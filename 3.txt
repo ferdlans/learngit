@@ -1,4 +1,111 @@
-123
-ceshi
 
-niha
+model/password/password
+   /**
+     * 检测admin是否弱密码
+     * 密码长度8-16位，必须包含数字、字母、大小写，密码不得包含于账号相同的字串和公司域名
+     * param string $passwd 密码
+     * param string $account 账号
+     * @return bool
+     * @throws SysException
+     */
+    public function checkAdminWeakPwd(){
+        $passwd = $this->checkVariate('passwd');
+        $account = $this->User->getAccount();
+        if(strlen($passwd) < 8 || strlen($passwd) > 16) return true;
+        if(!preg_match("/[0-9]{1,}/",$passwd)) return true;
+        if(!preg_match("/[a-zA-Z]{1,}/",$passwd)) return true;
+        if(stristr($passwd,"cug") || stristr($passwd,$account)) return true;
+        return false;
+    }
+
+
+    editPassWord
+    //        //检测是否有修改权限
+	//        $check_role = (new UpdateUser($this->User,$this->User,new Role($this->User->getRoleId())))->conditionJudgment();
+	//        if(!$check_role){
+	//            throw new SysException("你没有权限修改密码");
+	//        }
+
+    index/validate/uservalidate
+
+    protected  function checkWeakPwd($value,$rule,$data=[]){
+        if(!preg_match("/(?![0-9A-Z]+$)(?![0-9a-z]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}/",$value)){
+            return "密码不符合规则";
+        }
+        $account = (new User($data['uid']))->getAccount();
+        if(stristr($value,"cug") || stristr($value,$account)) return "密码不能包含用户名或公司域名";
+        return true;
+    }
+    model/user/login
+	getAccountInfoAndCheck()
+    'isWeakPwd'=>$this->checkWeakPwd(),
+
+    /**
+     * 检测是否弱密码
+     * @return bool
+     * @throws SysException
+     */
+    private function checkWeakPwd()
+    {
+        $passwd = $this->checkVariate('passwd');
+        $password = $this->getPasswordObj()->setPasswd($passwd)->checkAdminWeakPwd();
+        return $password;
+    }
+
+
+    ///
+
+    common
+
+     /*检测弱密码*/
+        if((new AdminUserLogin())->checkWeakPwd()){
+            if(
+                !(strtoupper($this->controller) == strtoupper("user") && strtoupper($this->action) == strtoupper("editUserPassword"))
+                &&
+                !(strtoupper($this->controller) == strtoupper("index") && strtoupper($this->action) == strtoupper("index"))
+            ){
+                return $this->success('密码强度不够，请修改密码','admin/User/editUserPassword');
+            }
+        }
+
+     model/user/login
+     /**
+     * 检测是否是弱密码
+     * @return bool
+     */
+    public function checkWeakPwd(){
+        /** 判断是否存在Cookie */
+        $userToken = Cookie::get($this->getLoginKey());
+        $userInfo = false;
+        if($userToken){
+            $userInfo = Cache::get($userToken);
+        }
+        if($userInfo && $userInfo['isWeakPwd']) {
+            return true;
+        }
+        return false;
+    }   
+
+    signIn()
+    'isWeakPwd' => $res['userInfo']['isWeakPwd']
+
+    controll/user
+    editUserPassword()
+
+            if((new AdminUserLogin())->checkWeakPwd()){
+                $remakeString =
+                    "密码强度不够，请修改密码。</br>".
+                    "1、必须包含大小写字母</br>".
+                    "2、必须有字母和数字</br>".
+                    "3、密码不能包含你的完整用户名和公司域名</br>".
+                    "4、位数8~16位</br>";
+                $form->setRemark($remakeString);
+            }
+    user/userCommonV        
+    protected  function checkWeakPwd($value,$rule,$data=[]){
+        if(!preg_match("/(?![0-9A-Z]+$)(?![0-9a-z]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}/",$value)){
+            return "密码不符合规则";
+        }
+        if(stristr($value,"cug") || stristr($value,$data['account'])) return "密码不能包含用户名或公司域名";
+        return true;
+    }        
